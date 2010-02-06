@@ -1,0 +1,78 @@
+<html>
+ <head>
+	<title>semi supervised naive bayes</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link rel=StyleSheet href="style.css" type="text/css">
+ </head>
+<body>
+
+<p>
+<a href="algorithm.html">&lt;&lt;&nbsp;&nbsp;the base algorithm</a>&nbsp;&nbsp;&nbsp;
+<a href="index.html">index</a>&nbsp;&nbsp;&nbsp;
+<a href="generating_test_data.html">generating test data&nbsp;&nbsp;&gt;&gt;</a>
+</p>
+
+<h2>distributing</h2>
+
+<p>
+can this algorithm be modified to work in a distributed environment?</br>
+yes! with only a minor change.</br>
+</p>
+
+<p>
+it turns out the moving of elements in the list to before the pivot doesn't actually have to be done.</br>
+all that we are actually interested in where the pivot <i>would</i> end up.</br>
+this can be derived by counting the number of elements less than the pivot and adding 1.</br>
+</p>
+
+<p>
+revisiting the previous examples then;
+<p>
+
+<h4>pivot to the right of the median postition</h4>
+<p>
+<pre>L1 = [6 3 1 1 5 <u>9</u> 2 4 5 3 7]</pre>
+if we count the number of elements &lt; 6 we get 8</br>
+so 6 is the 9th order stat</br>
+since the 9th &gt; 6th we need to discard all values &gt;=6</br>
+<pre>L2 = [3 1 1 5 2 <u>4</u> 5 3]</pre>
+and continue looking for the 6th order stat
+</p>
+
+<h4>pivot to the left of the median postition</h4>
+<p>
+<pre>L1 = [2 3 1 1 5 <u>9</u> 3 6 5 3 5]</pre>
+if we count the number of elements &lt; 2 we get 2</br>
+so 2 is the 3rd order stat</br>
+since 3rd &lt; 6th we need to discard all values &lt; 2</br>
+<pre>L2 = [2 3 5 <u>9</u> 3 6 5 3 5]</pre>
+in this case we need to rotate since the pivot ended up in the first position</br>
+<pre>L2 = [3 5 9 <u>3</u> 6 5 3 5 2]</pre>
+and continue looking for the 6-2 = 4th order stat
+</p>
+
+<a name="counting_not_moving"></a>
+<h4>counting not moving</h4>
+
+<p>
+so we never had to actually move any numbers around.</br>
+what things do we end up doing against the list elements?</br>
+<ul>
+<li>count the total number of elements</li>
+<li>determine the min and max</li>
+<li>count number of elements less than a particular value</li>
+<li>discard all elements less than a particular value</li>
+<li>discard all elements greater than or equal to a particular value</li>
+<li>rotate the head of the list to the tail</li>
+</ul>
+all these things can be easily applied in a distributed environment where we are dealing with not just one list but a set of lists across machines.</br>
+the only non trivial thing is the rotation, and we'll soon see it's not that hard.</br>
+</p>
+<p>
+<a href="algorithm.html">&lt;&lt;&nbsp;&nbsp;the base algorithm</a>&nbsp;&nbsp;&nbsp;
+<a href="index.html">index</a>&nbsp;&nbsp;&nbsp;
+<a href="generating_test_data.html">generating test data&nbsp;&nbsp;&gt;&gt;</a>
+</p>
+
+
+</body>

@@ -15,13 +15,9 @@ articles.each do |article|
 end
 
 terms = [:website, :on, :hollywood]
-puts "prob(terms|perez) = #{nbc.probability_of_words_given_class terms, 'http://www.perezhilton.com/index.xml'.to_sym}"
-puts "prob(terms|thereg) = #{nbc.probability_of_words_given_class terms, 'http://www.theregister.co.uk/excerpts.rss'.to_sym}"
 puts nbc.classify terms
 
 terms = [:website, :on, :linux]
-puts "prob(terms|perez) = #{nbc.probability_of_words_given_class terms, 'http://www.perezhilton.com/index.xml'.to_sym}"
-puts "prob(terms|thereg) = #{nbc.probability_of_words_given_class terms, 'http://www.theregister.co.uk/excerpts.rss'.to_sym}"
 puts nbc.classify terms
 
 =begin

@@ -1,0 +1,17 @@
+td { width: 300px; }
+
+		body {
+  		  margin: 10px 0px 0px 50px;
+		  font-family: verdana, geneva, arial, helvetica, sans-serif; 
+		  font-size: 16px; 
+		  background-color: #adffaa; 
+		  text-decoration: none; 
+		  font-weight: normal; 
+		  line-height: normal; 
+			
+		}
+		
+		a:link     { color: #cc0000; text-decoration: underline; }
+		a:visited  { color: #cc0000; text-decoration: underline; }
+		a:active   { color: #cc0000; text-decoration: underline; }
+		a:hover    { color: #cc0000; text-decoration: underline; }

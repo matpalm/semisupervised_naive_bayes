@@ -52,7 +52,7 @@ class NaiveBayesClassifier
 		max_prob = nil
 		max_prob_class = []
 		@class_info.keys.each do |clas|
-			prob = probability_of_words_given_class words, clas
+			prob = probability_of_class_given_words words, clas
 			if prob == max_prob or max_prob==nil
 				max_prob = prob
 				max_prob_class << clas
@@ -64,29 +64,33 @@ class NaiveBayesClassifier
 		max_prob_class
 	end
 
-	def probability_of_words_given_class words, clas
-		prob_fractions = conditional_probabilities_with_estimator_if_required words.uniq, clas
+	def probability_of_class_given_words words, clas
+		prob_fractions = term_probabilities_given_class_with_estimator_if_required words.uniq, clas
+		puts "P(#{words.inspect} | #{clas}) = #{prob_fractions.inspect}"
 		prob_fractions.log_sum
 	end
 
-    def conditional_probabilities_with_estimator_if_required(words, clas)
-        probabilities = conditional_probabilities(words,clas)
-				#puts "probabilities=#{probabilities.inspect}"
-        probabilities = probabilities.apply_estimator if probabilities.has_at_least_one_zero?
-        probabilities
-    end
+  def term_probabilities_given_class_with_estimator_if_required(words, clas)
+		probabilities = term_probabilities_given_class(words,clas)
+		puts "term_probabilities_given_class (pre estimator)=#{probabilities.inspect}"
+		if probabilities.has_at_least_one_zero?
+			probabilities = probabilities.apply_estimator 
+			puts "term_probabilities_given_class (post estimator)=#{probabilities.inspect}"
+		end
+		probabilities
+  end
 
-    def conditional_probabilities(words, clas)
-        words.collect { |word| conditional_probability(word, clas) }
-    end
+  def term_probabilities_given_class(words, clas)
+    words.collect { |word| conditional_probability(word, clas) }
+  end
 
-    def conditional_probability(word, clas)
-				#puts ">conditional_probability word=#{word} clas=#{clas}"
-        class_info = @class_info[clas]
-				#puts "#{@class_info.keys.inspect}"
-        return 0 unless class_info
-        class_info.probability_of(word)
-    end
+  def conditional_probability(word, clas)
+		#puts ">conditional_probability word=#{word} clas=#{clas}"
+    class_info = @class_info[clas]
+		#puts "#{@class_info.keys.inspect}"
+    return 0 unless class_info
+    class_info.probability_of(word)
+  end
 
 end
 
