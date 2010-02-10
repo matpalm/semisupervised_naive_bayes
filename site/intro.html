@@ -1,9 +1,10 @@
 <html>
- <head>
+<head>
 	<title>semi supervised naive bayes</title>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <link rel=StyleSheet href="style.css" type="text/css">
- </head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel=StyleSheet href="style.css" type="text/css">
+</head>
+
 <body>
 
 <p>
@@ -12,67 +13,385 @@
 <a href="generating_test_data.html">generating test data&nbsp;&nbsp;&gt;&gt;</a>
 </p>
 
-<h2>distributing</h2>
+<h1>semi supervised algorithms</h1>
 
 <p>
-can this algorithm be modified to work in a distributed environment?</br>
-yes! with only a minor change.</br>
+firstly what is a semi supervised algorithm?
+</p>
+
+<h2>supervised learning</h2>
+<p>
+a <em>supervised</em> learning algorithm is one where <em>all</em> of the training examples are labelled.</br>
+in this case we are trying to predict a feature of a new example.
 </p>
 
 <p>
-it turns out the moving of elements in the list to before the pivot doesn't actually have to be done.</br>
-all that we are actually interested in where the pivot <i>would</i> end up.</br>
-this can be derived by counting the number of elements less than the pivot and adding 1.</br>
+eg. given catergorised training data
+<table>
+<thead><tr><td>height</td><td>colour</td><td>class</td></tr></thead>
+<tbody>
+<tr><td>10cm</td><td>red</td><td>widget</td>
+<tr><td>15cm</td><td>blue</td><td>widget</td>
+<tr><td>10cm</td><td>blue</td><td>foobar</td>
+</tbody>
+</table>
 </p>
 
 <p>
-revisiting the previous examples then;
-<p>
-
-<h4>pivot to the right of the median postition</h4>
-<p>
-<pre>L1 = [6 3 1 1 5 <u>9</u> 2 4 5 3 7]</pre>
-if we count the number of elements &lt; 6 we get 8</br>
-so 6 is the 9th order stat</br>
-since the 9th &gt; 6th we need to discard all values &gt;=6</br>
-<pre>L2 = [3 1 1 5 2 <u>4</u> 5 3]</pre>
-and continue looking for the 6th order stat
+what might we predict the class of a new item to be?
+<table>
+<thead><tr><td>height</td><td>colour</td><td>class</td></tr></thead>
+<tbody>
+<tr><td>15cm</td><td>green</td><td>???</td>
+</tbody>
+</table>
 </p>
 
-<h4>pivot to the left of the median postition</h4>
+<h2>unsupervised learning</h2>
 <p>
-<pre>L1 = [2 3 1 1 5 <u>9</u> 3 6 5 3 5]</pre>
-if we count the number of elements &lt; 2 we get 2</br>
-so 2 is the 3rd order stat</br>
-since 3rd &lt; 6th we need to discard all values &lt; 2</br>
-<pre>L2 = [2 3 5 <u>9</u> 3 6 5 3 5]</pre>
-in this case we need to rotate since the pivot ended up in the first position</br>
-<pre>L2 = [3 5 9 <u>3</u> 6 5 3 5 2]</pre>
-and continue looking for the 6-2 = 4th order stat
-</p>
-
-<a name="counting_not_moving"></a>
-<h4>counting not moving</h4>
-
-<p>
-so we never had to actually move any numbers around.</br>
-what things do we end up doing against the list elements?</br>
-<ul>
-<li>count the total number of elements</li>
-<li>determine the min and max</li>
-<li>count number of elements less than a particular value</li>
-<li>discard all elements less than a particular value</li>
-<li>discard all elements greater than or equal to a particular value</li>
-<li>rotate the head of the list to the tail</li>
-</ul>
-all these things can be easily applied in a distributed environment where we are dealing with not just one list but a set of lists across machines.</br>
-the only non trivial thing is the rotation, and we'll soon see it's not that hard.</br>
+an <em>unsupervised</em> learning algorithm is one where <em>none</em> of our training examples are labelled.</br>
+in this case we are just looking to find patterns in the data.
 </p>
 <p>
-<a href="algorithm.html">&lt;&lt;&nbsp;&nbsp;the base algorithm</a>&nbsp;&nbsp;&nbsp;
-<a href="index.html">index</a>&nbsp;&nbsp;&nbsp;
-<a href="generating_test_data.html">generating test data&nbsp;&nbsp;&gt;&gt;</a>
+clustering is a classic example of an unsupervised algorithm.
 </p>
 
+<h2>semi supervised learning</h2>
+<p>
+a <em>semi supervised</em> learning algorithm is one where, wait for it, <em>some</em> of the training examples are labelled.</br>
+</p>
+
+<p>
+a good example of this is categorising text documents.</br>
+we might have a large existing corpus of documents but can only afford to label some of the data.</br>
+it is worth trying to use the entire corpus though since it might contain some inherent structure.
+</p>
+
+<h1>semi supervised naive bayes</h1>
+
+<h2>example using normal naive bayes</h2>
+
+<p>
+say we to classify the new rss articles we receive each day to decide if we want to read them.</br>
+in a normal naive bayes system, which i've discussed in <a href="rss.feed/p3/">a previous article</a>, we train a classifier with some labelled articles we have already collected</br>
+</p>
+
+<p>
+say we have collected a huge historical corpus of six articles (taken from <a href="http://www.theregister.co.uk/">the register</a> and <a href="http://perezhilton.com/">perez hilton</a>)</br>
+to make full use of the data we would need to label all six examples, but due to time constraints we only have time to do four</br>
+<small>( realistically though the number of unlabelled examples would be much greater than the number of labelled examples)</small></br>
+<table>
+<thead>
+<tr><td>feed</td>         <td>doc</td> <td>article text</td>                         <td>class</td></tr>
+</thead>
+<tbody>
+<tr><td>the register</td> <td>1</td> <td>new linux goes fast</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>ignore</td></tr>
+<tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>ignore</td></tr>
+<tr><td>the register</td> <td>5</td> <td>linux website</td>                 <td></td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>     <td></td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+a new article then comes along...
+<table>
+<thead><tr><td>feed</td>         <td>article text</td>            <td>class</td></tr></thead>
+<tbody><tr><td>perez hilton</td> <td>movie on fashion</td>      <td>??</td></tr></tbody>
+</table>
+what class should we assign this article?
+</p>
+
+<p>
+in a traditional naive bayes we train using the four labelled examples and then classify the new article</br>
+we have no way of making use of the two unlabelled documents</br>
+naive bayes gives a probability estimate of each possible class and we normally choose the highest as the predicted class</br>
+</p>
+
+<p>
+eg for the above example of 'movie on fashion'...
+</p>
+
+<p>
+<pre>
+class  d new linux goes fast holly cele quake runs on occurs in 
+read   1 1   1     1    1
+ignore 2           1    1    1     1 
+read   3     1                          1     1    1
+ignore 4                     1          1             1      1
+</pre>
+</p>
+
+<p>
+<pre>
+P(read | 'movie on fashion')
+~= P('movie on fashion' | read) * P(read) 
+~= P('movie' | read) * P('on' | read) * P('fashion' | read) * P(read)  # naive bayes assumption
+~= 0 * 1/2 * 0/2 * P(read)
+~= 1/5 * 2/5 * 1/5 * P(read)                                           # additive smoothing
+~= 2/125 * P(read)
+~= 2/125 * 1/2
+~= 2/250
+
+P(ignore | 'movie on fashion')
+~= P('movie on fashion' | ignore) * P(ignore) 
+~= P('movie' | ignore) * P('on' | ignore) * P('fashion' | ignore) * P(ignore)  # naive bayes assumption
+~= 0/2 * 0/2 * 0/2 * P(ignore)     
+~= 1/5 * 1/5 * 1/5 * P(ignore)                                                 # additive smoothing
+~= 1/125 * P(ignore)
+~= 1/125 * 1/2
+~= 1/250
+</pre>
+</p>
+
+<p>
+normalising these estimates gives...
+<pre>
+P(read | 'movie on fashion')   ~= 2/250 ~= 0.66
+P(ignore | 'movie on fashion') ~= 1/250 ~= 0.33
+</pre>
+</p>
+
+<p>
+diving into this a little bit we can see this prediction is made entirely based on the presence of the term 'on' in a previous to-read article</br>
+the terms 'movie' and 'fashion', having never been seen in the training set, were not part of the decision...
+</p>
+
+<h2>example using semi supervised naive bayes</h2>
+
+<p>
+so how does a semi supervised version of naive bayes work let us make use of the unlabelled documents?</br>
+</p>
+
+<p>
+let's look at the same corpus as before, with four labelled and two unlabelled examples.</br>
+this time though we'll record not the class directly but the probability distribution instead</br>
+<table>
+<thead><tr><td>feed</td>         <td>doc</td> <td>article text</td>                <td>P(read)</td> <td>P(ignore)</td></tr></thead>
+<tbody>
+<tr><td>the register</td> <td>1</td> <td>new linux goes fast</td>           <td>1.00</td> <td>0.00</td></tr>
+<tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>0.00</td> <td>1.00</td></tr>
+<tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>1.00</td> <td>0.00</td></tr>
+<tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>0.00</td> <td>1.00</td></tr>
+<tr><td>the register</td> <td>5</td> <td>linux website</td>              <td>?</td><td>?</td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>  <td>?</td><td>?</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+first let's classify documents 5 and 6 using labelled docs 1 to 4.
+</p>
+
+<p>
+<pre>
+P(read | 'linux website')
+~= P('linux website' | read)  *  P(read) 
+~= P('linux' | read) * P('website' | read) * P(read)  # naive bayes assumption
+~= 2/2 * 0/2 * P(read)
+~= 3/4 * 1/4 * P(read)                                # additive smoothing
+~= 3/16 * P(read)
+~= 3/16 * 1/2
+~= 3/32
+
+P(ignore | 'linux website')
+~= P('linux website' | ignore) * P(ignore) 
+~= P('linux' | ignore) * P('website' | ignore)  * P(ignore)  # naive bayes assumption
+~= 0/2 * 0/2 * P(ignore)     
+~= 1/4 * 1/4 * P(ignore)                                     # additive smoothing
+~= 1/16 * P(ignore)
+~= 1/16 * 1/2
+~= 1/32
+</pre>
+</p>
+
+<p>
+normalising these estimates gives...
+<pre>
+P(read | 'linux website)    ~= 3/32 ~= 0.75
+P(ignore | 'linux website') ~= 1/32 ~= 0.25
+</pre>
+usually we would classify this as an article to read since 75% > 25%</br>
+for the semi supervised case we want to keep this distribution.
+</p>
+
+<p>
+similarily for 'hollywood fashion website'...
+<pre>
+P(read | 'hollywood fashion website')
+~= P('hollywood' | read) * P('fashion' | read) * P('website' | read) * P(read) 
+~= 0/2 * 0/2 * 0/2 * P(read) 
+~= 1/5 * 1/5 * 1/5 * P(read) 
+~= 1/125 * P(read)
+~= 1/125 * 1/2
+~= 1/250
+
+P(ignore | 'hollywood fashion website')
+~= P('hollywood' | ignore) * P('fashion' | ignore) * P('website' | ignore) * P(ignore)  
+~= 2/2 * 0/2 * 0/2 * P(ignore) 
+~= 3/5 * 1/5 * 1/5 * P(ignore) 
+~= 3/125 * P(ignore)
+~= 3/125 * 1/2
+~= 3/250
+</pre>
+</p>
+
+<p>
+normalising these estimates gives...
+<pre>
+P(read | 'hollywood fashion website')   ~= 1/250 ~= 0.25
+P(ignore | 'hollywood fashion website') ~= 3/250 ~= 0.75
+</pre>
+
+</p>
+
+<p>
+<table>
+<thead><tr><td>feed</td>         <td>doc</td> <td>article text</td>                <td>P(read)</td> <td>P(ignore)</td></tr></thead>
+<tbody>
+<tr><td>the register</td> <td>1</td> <td>new linux goes fast</td>           <td>1.00</td> <td>0.00</td></tr>
+<tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>0.00</td> <td>1.00</td></tr>
+<tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>1.00</td> <td>0.00</td></tr>
+<tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>0.00</td> <td>1.00</td></tr>
+<tr><td>the register</td> <td>5</td> <td>linux website</td>              <td>0.75</td> <td>0.25</td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>  <td>0.25</td> <td>0.75</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+given this new values we can now <em>reclassify</em> documents 5 and 6 using a classifier trained with all 6</br>
+</p>
+
+<p>
+<pre>
+read ignore d new linux goes fast holly cele quake runs on occurs in website fashion
+1.00 0.00   1 1   1     1    1
+0.00 1.00   2           1    1    1     1 
+1.00 0.00   3     1                          1     1    1
+0.00 1.00   4                     1          1             1      1
+0.75 0.25   5     1                                                  1
+0.25 0.75   6                     1                                  1        1
+</pre>
+</p>
+TODO: explode this next piece and lay out steps in more detail, at least for first example...
+<p>
+<pre>
+P(read | 'linux website')
+~= P('linux website' | read)  *  P(read) 
+~= P('linux' | read) * P('website' | read) * P(read)
+~= 2.75/3 * 1/3 * P(read)
+~= 2.75/9 * P(read)
+~= 2.75/9 * 3/6
+~= 0.152
+
+P(ignore | 'linux website')
+~= P('linux website' | ignore) * P(ignore) 
+~= P('linux' | ignore) * P('website' | ignore) * P(ignore)
+~= 0.25/3 * 1/3 * P(ignore)     
+~= 0.25/9 * P(ignore)                                                                
+~= 0.25/9 * 3/6
+~= 0.013 
+
+P(read | 'website on linux')   ~= 0.152 ~= 0.92
+P(ignore | 'website on linux') ~= 0.013 ~= 0.08
+</pre>
+</p>
+
+<p>
+<pre>
+P(read | 'hollywood fashion website')
+~= P('hollywood fashion website' | read) * P(read) 
+~= P('hollywood' | read) * P('fashion' | read) * P('website' | read) * P(read)
+~= 0.25/3 * 0.25/3 * 1/3 * P(read)
+~= 0.0023 * 3/6
+~= 0.001
+
+P(ignore | 'hollywood fashion website')
+~= P('hollywood fashion website' | ignore) * P(ignore) 
+~= P('hollywood' | ignore) * P('fashion' | ignore) * P('website' | ignore) * P(ignore)
+~= 2.75/3 * 0.75/3 * 1/3 * P(ignore)
+~= 0.076 * 3/6
+~= 0.038
+
+P(read | 'hollywood fashion website')   ~= 0.001 ~= 0.03
+P(ignore | 'hollywood fashion website') ~= 0.038 ~= 0.97
+</pre>
+</p>
+
+<p>
+which gives us new values for the docs 5 and 6
+<table>
+<thead><tr><td>feed</td>         <td>doc</td> <td>article text</td>                <td>P(read)</td> <td>P(ignore)</td></tr></thead>
+<tbody>
+<tr><td>the register</td> <td>1</td> <td>new linux goes fast</td>           <td>1.00</td> <td>0.00</td></tr>
+<tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>0.00</td> <td>1.00</td></tr>
+<tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>1.00</td> <td>0.00</td></tr>
+<tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>0.00</td> <td>1.00</td></tr>
+<tr><td>the register</td> <td>5</td> <td>website on linux</td>              <td>0.92</td> <td>0.08</td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>website on hollywood fashion</td>  <td>0.03</td> <td>0.97</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+repeat retraining and reclassifying docs 5 and 6 until the probability distrubtion converges.</br>
+(note: in this case it looks like it's moving towards a clear 1/0 relationship but it's not always like that)</br>
+</p>
+
+<p>
+we can now classify our new document 'movie on fashion'
+<pre>
+P(read | 'movie on fashion')
+~= P('movie on fashion' | read) * P(read) 
+~= P('movie' | read) * P('on' | read) * P('fashion' | read) * P(read)  
+~= 0/2.95 * 1/2.95 * 0.03/2.95 * P(read)
+~= 1/5.95 * 2/5.95 * 1.03/5.95 * P(read)
+~= 2.03/210 * 2.95/6
+~= 0.0047
+
+P(ignore | 'movie on fashion')
+~= P('movie on fashion' | ignore) * P(ignore) 
+~= P('movie' | ignore) * P('on' | ignore) * P('fashion' | ignore) * P(ignore)  
+~= 0/3.05 * 0/3.05 * 0.97/3.05 * P(ignore)
+~= 1/6.05 * 1/6.05 * 1.97/6.05 * P(ignore)
+~= 1.97/221.4 * 3.05/6
+~= 0.0045
+
+P(read | 'movie on fashion')   ~= 0.0047 ~= 0.51
+P(ignore | 'movie on fashion') ~= 0.0045 ~= 0.49
+</pre>
+</p>
+
+<p>
+previously this was being classified as P(read) ~= 0.66 and P(ignore) ~= 0.33</br>
+we can see how the inclusion of fashion, as related to hollywood through doc 6,</br>
+has increased the 'ignoreness' of this website.
+</p>
+
+<p>
+i suspect also there is also something not quite right with the way i'm doing the additive smoothing...<br>
+all mutually exclusive probabilies should add to one;</br>
+<pre>
+P(ignore) + P(read)
+= 2.95/6 + 3.05/6
+= 1 
+all good
+
+P(ignore) + P(read)
+= 2.03/210 * 1.97/221.4
+= 0.17
+not so good 
+
+perhaps i should normalise them first???
+</pre>
+</p>
+
+</pre>
+</p>
 
 </body>
+                                                         
+</html>

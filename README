@@ -50,7 +50,7 @@ P(perez)
 
 P(feed=perez | 'website on linux')
 ~= 1/125 * 1/2
-~= 1/500
+~= 1/250
 
 P(feed=the register | 'website on linux') ~= 1/50  ~= 0.9
 P(feed=perez | 'website on linux')        ~= 1/500 ~= 0.1
