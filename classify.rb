@@ -15,37 +15,7 @@ articles.each do |article|
 end
 
 terms = [:website, :on, :hollywood]
-puts nbc.classify terms
+puts "nbc prob distr " + nbc.probability_distribution_for(terms).inspect
 
 terms = [:website, :on, :linux]
-puts nbc.classify terms
-
-=begin
-
-classifiers = []
-#classifiers << MAlgoClassifier.new
-#classifiers << WordOccClassifier.new
-#classifiers << NaiveBayesClassifier.new
-classifiers << MultinominalBayesClassifier.new
-#classifiers << MarkovChainClassifier.new(:include_start_end => true)
-classifiers << VectorSpaceModel.new
-
-crossvalidators = classifiers.collect { |classifier| CrossValidator.new(classifier, slice.to_i, num_slices.to_i) }
-
-articles.each_with_index do |article, idx|
-	crossvalidators.each do |crossvalidator|
-		crossvalidator.training_pass idx, article	
-	end
-end
-articles.each_with_index do |article, idx|
-	crossvalidators.each do |crossvalidator|
-		crossvalidator.testing_pass idx, article	
-	end
-end
-
-crossvalidators.each do |crossvalidator|
-	classifier = crossvalidator.classifier
-	display_name = classifier.respond_to?(:display_name) ? classifier.display_name : classifier.class.to_s
-	puts "result #{display_name} #{crossvalidator.pass_rate}"
-end
-=end
+puts "nbc prob distr " + nbc.probability_distribution_for(terms).inspect
