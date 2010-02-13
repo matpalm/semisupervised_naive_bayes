@@ -34,24 +34,51 @@ end
 class NaiveBayesClassifier
 
 	def initialize			
-		reset
-	end
-
-	def reset
 		@total_training_examples = 0		
 		@class_info = {}
 	end
-	
-	def train(words, clas)		
-		@total_training_examples += 1
-		@class_info[clas] ||= ClassInfo.new		
-		@class_info[clas].add_words(words)
+
+	def train training_set
+		training_set.each do |example|			
+			@total_training_examples += 1
+			@class_info[example[:classification]] ||= ClassInfo.new		
+			@class_info[example[:classification]].add_words example[:words]
+		end
 	end
-		
+
+	def test test_set
+		total = 0
+		correct = 0
+		test_set.each do |example|
+			total += 1
+			predicted = classify example[:words]
+			correct += 1 if predicted == example[:classification]
+#			puts "example=#{example[:words][0,10].inspect} predicted=#{predicted} actual=#{example[:classification]} correct=#{correct} total=#{total}"
+		end				
+		correct.to_f / total
+	end
+
+	def classify words
+		distribution = probability_distribution_for words
+		max_prob = nil
+		max_prob_classes = []
+		distribution.each do |clas, prob|
+			if prob == max_prob or max_prob==nil
+				max_prob = prob
+				max_prob_classes << clas
+			elsif prob > max_prob
+				max_prob = prob
+				max_prob_classes = [clas]
+			end
+		end
+		return max_prob_classes.first if max_prob_classes.length==1
+		return :cant_decide
+	end
+
 	def probability_distribution_for words
 		ordered_keys = @class_info.keys
 		probs = ordered_keys.collect { |k| probability_of_class_given_words words, k }
-		puts "probs #{probs.inspect}"
+#		puts "probs #{probs.inspect}"
 		probs.normalized_proportions!
 		distr = {}
 		ordered_keys.zip(probs).each do |key_value|
@@ -59,22 +86,6 @@ class NaiveBayesClassifier
 			distr[clas] = prob
 		end
 		distr
-	end
-
-	def classify words
-		distribution = probability_distribution_for words
-		max_prob = nil
-		max_prob_class = []
-		distribution.each do |clas, prob|
-			if prob == max_prob or max_prob==nil
-				max_prob = prob
-				max_prob_class << clas
-			elsif prob > max_prob
-				max_prob = prob
-				max_prob_class = [clas]
-			end
-		end
-		max_prob_class
 	end
 
 	def probability_of_class_given_words words, clas

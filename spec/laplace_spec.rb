@@ -4,7 +4,7 @@ describe 'laplace additions to array' do
 	it 'should provide fraction helpers' do
 		[1,2].nominator.should == 1
 		[1,2].denominator.should == 2
-		[[1,2],[3,4]].nominators.should == [1,3]
+		[[1,2],[3,4]].numerators.should == [1,3]
 		[[1,2],[3,4]].denominators.should == [2,4]
 	end
 
@@ -13,10 +13,6 @@ describe 'laplace additions to array' do
 		[[0,2],[3,4]].should have_at_least_one_zero
 		[[1,2],[0,4]].should have_at_least_one_zero
 		[[0,2],[0,4]].should have_at_least_one_zero
-	end
-
-	it 'should flatten (eval) fractions' do
-		[[1,2],[3,4]].eval_fractions.should == [0.5, 0.75]
 	end
 
 	it 'should calculate gcd' do

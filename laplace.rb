@@ -34,7 +34,7 @@ class Array
 		!!(find { |f| f.nominator==0 })
 	end
 
-	def nominators 
+	def numerators 
 		collect { |f| f.nominator }
 	end
 
@@ -53,7 +53,8 @@ class Array
 	end
 	
 	def apply_estimator!
-		numerators, denominator = recalc_with_lcm
+		# numerators, denominator = recalc_with_lcm # NOT REQUIRED FOR CASE OF P(x|read) since all have same denominator
+		denominator = first.denominator
 		replace numerators.collect { |n| [n+1, denominator+numerators.length] }		
 	end
 
@@ -69,9 +70,9 @@ class Array
 	
 	def normalized_proportions!
 		denominator_lcm = denominators.lcm
-		nominator_multipliers = denominators.collect { |d| denominator_lcm / d }
-		new_nominators = nominators.zip(nominator_multipliers).collect { |a| a[0]*a[1] }		
-		replace new_nominators.normalize
+		numerator_multipliers = denominators.collect { |d| denominator_lcm / d }
+		new_numerators = numerators.zip(numerator_multipliers).collect { |a| a[0]*a[1] }		
+		replace new_numerators.normalize
 	end
 
 	def assert_is_fraction testee=self
