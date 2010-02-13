@@ -57,12 +57,6 @@ class Array
 		replace numerators.collect { |n| [n+1, denominator+numerators.length] }		
 	end
 
-=begin
-	def eval_fractions		
-		collect { |f| f.nominator.to_f / f.denominator }
-	end
-=end
-
 	def product
 		numerator = denominator = 1
 		each do |nd|
@@ -73,12 +67,6 @@ class Array
 		[ numerator, denominator ]
 	end
 	
-=begin
-	def log_sum
-		eval_fractions.inject(0) { |sum, fr| sum + Math.log(fr) }
-	end
-=end
-
 	def normalized_proportions!
 		denominator_lcm = denominators.lcm
 		nominator_multipliers = denominators.collect { |d| denominator_lcm / d }

@@ -51,6 +51,7 @@ class NaiveBayesClassifier
 	def probability_distribution_for words
 		ordered_keys = @class_info.keys
 		probs = ordered_keys.collect { |k| probability_of_class_given_words words, k }
+		puts "probs #{probs.inspect}"
 		probs.normalized_proportions!
 		distr = {}
 		ordered_keys.zip(probs).each do |key_value|

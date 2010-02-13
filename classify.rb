@@ -14,8 +14,6 @@ articles.each do |article|
 	nbc.train article[:words], article[:classification]
 end
 
-terms = [:website, :on, :hollywood]
+terms = [:posts, :weekend, :linux]
 puts "nbc prob distr " + nbc.probability_distribution_for(terms).inspect
 
-terms = [:website, :on, :linux]
-puts "nbc prob distr " + nbc.probability_distribution_for(terms).inspect
