@@ -11,6 +11,7 @@ class Array
 	def normalize
 		total = inject { |a,v| a+v }
 		collect { |e| e.to_f / total }
+		#raise "here"
 	end
 
 	def gcd a, b
@@ -70,6 +71,7 @@ class Array
 	
 	def normalized_proportions!
 		denominator_lcm = denominators.lcm
+#		puts "denominators=#{denominators.inspect}"
 		numerator_multipliers = denominators.collect { |d| denominator_lcm / d }
 		new_numerators = numerators.zip(numerator_multipliers).collect { |a| a[0]*a[1] }		
 		replace new_numerators.normalize
@@ -79,4 +81,13 @@ class Array
 		raise "expected array to represent a fraction, not #{testee.inspect}" unless testee.length==2
 	end
 
+	def mean_square_error other
+		raise "require same length" unless length==other.length
+		total_square_error = 0.0
+		(0...length).each do |idx|
+			diff = (self[idx] - other[idx]).abs
+			total_square_error += diff * diff
+		end
+		total_square_error / length
+	end
 end

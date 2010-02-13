@@ -1,3 +1,5 @@
+bzcat perez.bz2 thereg.bz2 | shuf | head -300 | ./main.rb
+
 SERIOUS WORK IN PROGRESS!!!! NOT YET FOR GENERAL CONSUMPTION
 
 

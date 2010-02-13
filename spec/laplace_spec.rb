@@ -32,4 +32,10 @@ describe 'laplace additions to array' do
 		(fractions[2]-0.4821).abs.should < 0.001
 	end
 
+	it 'should calc mean square err' do
+		[1,2,3].mean_square_error([1,2,3]).should == 0
+		[2,3,6].mean_square_error([1,2,3]).should == 3 + 2.0/3
+	end
+
 end
+

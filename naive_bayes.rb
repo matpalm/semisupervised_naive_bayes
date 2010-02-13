@@ -12,10 +12,10 @@ class ClassInfo
 		@words_freq.default = 0
 	end
 		
-	def add_words words, weight
-		@count += weight
+	def add_words words, probability
+		@count += probability
 		words.uniq.each do |word|
-			@words_freq[word] += weight
+			@words_freq[word] += probability
 		end
 	end
 	
@@ -38,12 +38,16 @@ class NaiveBayesClassifier
 		@class_info = {}
 	end
 
+	def known_classes
+		@class_info.keys
+	end
+
 	def train training_set
 		training_set.each do |example|			
 			@total_training_examples += 1
 			example.classes.each do |clazz|
 				@class_info[clazz] ||= ClassInfo.new		
-				@class_info[clazz].add_words example.words, example.weight_for(clazz)
+				@class_info[clazz].add_words example.words, example.probability_of(clazz)
 			end
 		end
 	end
@@ -55,7 +59,7 @@ class NaiveBayesClassifier
 			total += 1
 			predicted = classify example.words
 			correct += 1 if predicted == example.main_class
-			puts "example=#{example.words[0,5].inspect} predicted=#{predicted} actual=#{example.main_class} correct=#{correct} total=#{total}"
+#			puts "example=#{example.words[0,5].inspect} predicted=#{predicted} actual=#{example.main_class} correct=#{correct} total=#{total}"
 		end				
 		correct.to_f / total
 	end

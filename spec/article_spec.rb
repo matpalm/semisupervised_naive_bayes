@@ -8,8 +8,8 @@ describe 'article' do
 
 	it 'should store class probabilities' do
 		article = Article.new nil, { :a => 1.0, :b => 0.3 }
-		article.weight_for(:a).should == 1.0
-		article.weight_for(:b).should == 0.3
+		article.probability_of(:a).should == 1.0
+		article.probability_of(:b).should == 0.3
 		article.classes.should == [:a,:b]
 	end
 
