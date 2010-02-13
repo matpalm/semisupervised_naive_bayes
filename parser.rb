@@ -1,3 +1,5 @@
+require 'article'
+
 class Parser
 		
 	def parse line
@@ -5,8 +7,8 @@ class Parser
 		words = text.gsub(/[^a-zA-Z0-9 ]/,' ').
 				split(/\s+/).
 				select { |w| w.length >1 }.
-				collect { |w| w.downcase.to_sym }  		
-		{:url => url.to_sym, :words => words}		
+				collect { |w| w.downcase.to_sym }
+		Article.new words, { url.to_sym => 1 }
 	end
 
 	def articles_from_stdin		

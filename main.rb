@@ -6,8 +6,6 @@ require 'naive_bayes'
 # read articles
 articles = []
 Parser.new.articles_from_stdin do |a|
-	a[:classification] = (a[:url] == 'http://www.perezhilton.com/index.xml'.to_sym ? :perez : :thereg)
-	a.delete :url
 	articles << a 
 end
 
@@ -21,7 +19,7 @@ puts "#labelled=#{labelled.length} #unlabelled=#{unlabelled.length}"
 
 nbc = NaiveBayesClassifier.new
 nbc.train labelled
-nbc.test unlabelled
+puts nbc.test unlabelled
 
 #ssnbc = SemiSupervisedNaiveBayesClassifier.new
 #ssnbc.
