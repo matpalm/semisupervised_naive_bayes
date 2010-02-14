@@ -12,13 +12,12 @@
 <a href="index.html">index</a>&nbsp;&nbsp;&nbsp;
 </p>
 
-<h1>bigger example</h1>
+<h1>but does it do any better?</h1>
 
 <h2>comparing plain supervised naive bayes vs semi supervised naive bayes</h2>
 
 <p>
-as a test i took a random sample of 300 rss articles take a total of 8000.</br>
-there was roughly a 50/50 split of articles between perez hilton and the register.
+as a test i took a random sample of 300 rss articles from a total of 8000. there was roughly a 50/50 split of articles between perez hilton and the register.
 </p>
 
 <p> 
@@ -51,6 +50,26 @@ the experiment was repeated 7 times for a different random 300 articles with the
 <p>
 <img src="g20.png"/>
 </p>
+
+<p>
+in every case we can see having the adding additional unlablled data makes an improvement. yay!</br>
+it's interesting that, for run 1 and 3, 200 unlabelled examples did no better than 100 unlabelled examples.</br>
+in general, seems semi supervised works pretty well!
+</p>
+
+<p>
+all the code is on <a href="http://github.com/matpalm/semisupervised_naive_bayes">github</a> and feel free to check out <a href="http://matpalm.com">other stuff i've done</a>
+</p>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10409220-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
 
 </body>
 </html>

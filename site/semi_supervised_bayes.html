@@ -10,7 +10,7 @@
 <p>
 <a href="intro.html">&lt;&lt;&nbsp;&nbsp;semi supervised algorithms</a>&nbsp;&nbsp;&nbsp;
 <a href="index.html">index</a>&nbsp;&nbsp;&nbsp;
-<a href="real_data_example.html">an example over real data&nbsp;&nbsp;&gt;&gt;</a>
+<a href="does_it_do_any_better.html">does it do any better?&nbsp;&nbsp;&gt;&gt;</a>
 </p>
 
 <h1>semi supervised naive bayes</h1>
@@ -18,14 +18,15 @@
 <h2>example using normal naive bayes</h2>
 
 <p>
-say we to classify the new rss articles we receive each day to decide if we want to read them.</br>
-in a normal naive bayes system, which i've discussed in <a href="rss.feed/p3/">a previous article</a>, we train a classifier with some labelled articles we have already collected</br>
+let's pretend we want to classify the new rss articles we receive each day to decide if we want to bother reading them.
+in a normal naive bayes system, which i've discussed in <a href="rss.feed/p3/">a previous article</a>, we'd train a classifier with some pre collected articles that we have taken the time to label as either to-read or to-ignore.</br>
 </p>
 
 <p>
-say we have collected a huge historical corpus of six articles (taken from <a href="http://www.theregister.co.uk/">the register</a> and <a href="http://perezhilton.com/">perez hilton</a>)</br>
-to make full use of the data we would need to label all six examples, but due to time constraints we only have time to do four</br>
-<small>( realistically though the number of unlabelled examples would be much greater than the number of labelled examples)</small></br>
+for example; say we have collected a huge historical corpus of six articles (taken from <a href="http://www.theregister.co.uk/">the register</a>
+and <a href="http://perezhilton.com/">perez hilton</a>). to make full use of the data we would need to label all six examples, but
+due to time constraints we have only had time to do four <small>(realistically though the number of unlabelled examples left over would be much
+greater than the number of labelled examples)</small></br>
 <table>
 <thead>
 <tr><td>feed</td>         <td>doc</td> <td>article text</td>                         <td>class</td></tr>
@@ -35,8 +36,8 @@ to make full use of the data we would need to label all six examples, but due to
 <tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>ignore</td></tr>
 <tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>read</td></tr>
 <tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>ignore</td></tr>
-<tr><td>the register</td> <td>5</td> <td>linux website</td>                 <td></td></tr>
-<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>     <td></td></tr>
+<tr><td>the register</td> <td>5</td> <td>linux website</td>                 <td>?</td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>     <td>?</td></tr>
 </tbody>
 </table>
 </p>
@@ -54,11 +55,11 @@ to which class should we assign this article?
 </p>
 
 <p>
-in a traditional naive bayes we can train only using the four labelled examples and have no way of making use of the two unlabelled documents</br>
+in a traditional naive bayes we can train only using the four labelled examples and have no way of making use of the two unlabelled documents.</br>
 </p>
 
 <p>
-eg to classify for the above example of 'movie on fashion' we first build a term occurence matrix for the four training examples...
+for example; to classify for the above example of 'movie on fashion' we first build a term occurence matrix for the four training examples...
 </p>
 
 <p>
@@ -76,7 +77,7 @@ eg to classify for the above example of 'movie on fashion' we first build a term
 </p>
 
 <p>
-and then calculate the predicted probabilities for both P(read) and P(ignore)
+and then calculate the predicted probabilities for both <tt>P(read)</tt> and <tt>P(ignore)</tt>
 <pre>
 P(read | 'movie on fashion')
 ~= P('movie on fashion' | read) * P(read) 
@@ -99,23 +100,23 @@ P(ignore | 'movie on fashion')
 </p>
 
 <p>
-as the estimated <tt>P(read)</tt> > <tt>P(ignore)</tt> we would class this as an article to read.
+as the estimated <tt>P(read)</tt> > <tt>P(ignore)</tt> we would class this as an article to-read.
 </p>
 
 <p>
-diving into this a little bit we can see this prediction is made entirely based on the presence of the term 'on' in a previous to-read article</br>
+diving into this a little bit we can see this prediction is made entirely based on the presence of the term 'on' in a previous to-read article. 
 the terms 'movie' and 'fashion', having never been seen in the training set, were not part of the decision...
 </p>
 
 <h2>example using semi supervised naive bayes</h2>
 
 <p>
-so how does a semi supervised version of naive bayes work let us make use of the unlabelled documents?</br>
+so how does a semi supervised version of naive bayes make use of the unlabelled documents?</br>
 </p>
 
 <p>
-let's look at the same corpus as before, with four labelled and two unlabelled examples.</br>
-this time though we'll record not the class directly but the probability distribution instead</br>
+let's look at the same corpus as before, with four labelled and two unlabelled examples.
+this time though we'll record not the class directly but the probability distribution instead...
 <table>
 <thead><tr><td>feed</td>         <td>doc</td> <td>article text</td>                <td>P(read)</td> <td>P(ignore)</td></tr></thead>
 <tbody>
@@ -130,7 +131,7 @@ this time though we'll record not the class directly but the probability distrib
 </p>
 
 <p>
-first let's classify documents 5 and 6 using labelled docs 1 to 4.
+first we classify documents 5 and 6 using labelled docs 1 thru 4.
 </p>
 
 <p>
@@ -161,7 +162,7 @@ normalising these estimates gives...
 P(read | 'linux website)    ~= 3/32 ~= 0.75
 P(ignore | 'linux website') ~= 1/32 ~= 0.25
 </pre>
-usually we would classify this as an article to read since 75% > 25%</br>
+usually we would classify this as an article to read since 75% > 25% but
 for the semi supervised case we want to keep this distribution.
 </p>
 
@@ -192,7 +193,10 @@ normalising these estimates gives...
 P(read | 'hollywood fashion website')   ~= 1/250 ~= 0.25
 P(ignore | 'hollywood fashion website') ~= 3/250 ~= 0.75
 </pre>
+</p>
 
+<p>
+we can now insert these predicted probabilities into our table
 </p>
 
 <p>
@@ -210,10 +214,7 @@ P(ignore | 'hollywood fashion website') ~= 3/250 ~= 0.75
 </p>
 
 <p>
-given this new values we can now <em>reclassify</em> documents 5 and 6 using a classifier trained with all 6</br>
-</p>
-
-<p>
+and given new values we can now <em>reclassify</em> documents 5 and 6 using a classifier trained with all 6</br>
 <table>
 <thead>
 <tr>
@@ -295,12 +296,13 @@ which gives us new values for the docs 5 and 6
 </p>
 
 <p>
-we can reiterate the retraining and reclassifying of docs 5 and 6 until the probability distrubtion converges.</br>
-(note: in this case it looks like it's moving towards a clear 1/0 relationship but it's not always like that)</br>
+this process of retraining and reclassifying the initially unlablled articles can be reiterated until the probability
+distrubtion converges. (note: in this case it looks like it's moving towards a clear case of to-read or to-ignore but it's not
+always like that)
 </p>
 
 <p>
-we can now classify our new document 'movie on fashion'
+once the probabilities have converged we can classify our new document 'movie on fashion' using the classifier training with all 6 examples.
 <pre>
 P(read | 'movie on fashion')
 ~= P('movie on fashion' | read) * P(read) 
@@ -324,15 +326,27 @@ P(ignore | 'movie on fashion') ~= 0.0045 ~= 0.49
 </p>
 
 <p>
-previously this was being classified as P(read) ~= 0.66 and P(ignore) ~= 0.33</br>
-and we can see now how the inclusion of fashion, as related to hollywood through doc 6,</br>
-has increased the 'ignoreness' of this website.
+recall that previously this was being classified by the normal naive bayes classifier as P(read) ~= 0.66 and P(ignore) ~= 0.33
 </p>
 
 <p>
-now lets have a look at <a href="real_data_example">an example over real data</a>
+we can see now how the inclusion of 'fashion', as related to 'hollywood' through doc 6, has increased the to-ignore probability of this example.
 </p>
 
+<p>
+so this semi supervised algorithm looks promising on paper but the real question is <a href="does_it_do_any_better.html">does it do any better</a> on real data?
+</p>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10409220-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
 </body>
-                                                         
+                                                        
 </html>

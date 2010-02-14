@@ -1,7 +1,7 @@
 
 
 		body {
-  		  margin: 10px 0px 0px 50px;
+  		  margin: 10px 600px 0px 50px;
 		  font-family: verdana, geneva, arial, helvetica, sans-serif; 
 		  font-size: 16px; 
 		  background-color: #cfffcc; 
@@ -17,7 +17,9 @@ pre { font-size: 0.9em }
 table { border-spacing: 0px;  
 	border-collapse: collapse;
 	font-size: 13px;
-	margin-top: 5px;}
+	margin-top: 5px;
+	margin-left: 20px;
+}
 
 thead td { background-color: #bdffcc }
 

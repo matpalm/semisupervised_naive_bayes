@@ -50,7 +50,8 @@ class SemiSupervisedNaiveBayesClassifier
 	def converged?
 		return false if @last_all_unlabelled_probabilities.nil?
 		mean_square_error = @last_all_unlabelled_probabilities.mean_square_error @all_unlabelled_probabilities
-		puts "converged? check -> mean_square_error=#{mean_square_error}"		
+		#puts "converged? check -> mean_square_error=#{mean_square_error}"		
+		raise "WTF?" if mean_square_error.nan?
 		mean_square_error < 0.0001
 	end
 
