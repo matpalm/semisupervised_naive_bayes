@@ -8,7 +8,7 @@ class Article
 	end
 
 	def probability_of clazz
-		@probability_distribution[clazz] || 0
+		@probability_distribution[clazz] || Rational(0,1)
 	end
 
 	def classes

@@ -8,7 +8,7 @@ class Parser
 				split(/\s+/).
 				select { |w| w.length >1 }.
 				collect { |w| w.downcase.to_sym }
-		Article.new words, { url.to_sym => 1 }
+		Article.new words, { url.to_sym => Rational(1,1) }
 	end
 
 	def articles_from_stdin		

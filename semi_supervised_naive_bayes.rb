@@ -35,6 +35,7 @@ class SemiSupervisedNaiveBayesClassifier
 		unlabelled_set.each do |unlabelled_example|
 			new_prob_distr = @nbc.probability_distribution_for unlabelled_example.words
 			unlabelled_example.probability_distribution = new_prob_distr
+			puts "unlabelled_example #{unlabelled_example.words.inspect} has a new prob dist #{new_prob_distr.inspect}"
 		end				
 		
 		# record all new probabilities in single array for later convergence checking
@@ -48,6 +49,7 @@ class SemiSupervisedNaiveBayesClassifier
 	end
 
 	def converged?
+		puts "converge check last=#{@last_all_unlabelled_probabilities.inspect} now=#{@all_unlabelled_probabilities.inspect}"
 		return false if @last_all_unlabelled_probabilities.nil?
 		mean_square_error = @last_all_unlabelled_probabilities.mean_square_error @all_unlabelled_probabilities
 		#puts "converged? check -> mean_square_error=#{mean_square_error}"		

@@ -7,12 +7,13 @@ class ClassInfo
 	attr_reader :words_freq
 	
 	def initialize
-		@count = 0
+		@count = Rational(0,1)
 		@words_freq = {}
-		@words_freq.default = 0
+		@words_freq.default = Rational(0,1)
 	end
 		
 	def add_words words, probability
+		puts "add_words words=#{words.inspect}, probability=#{probability}"
 		@count += probability
 		words.uniq.each do |word|
 			@words_freq[word] += probability
@@ -20,13 +21,17 @@ class ClassInfo
 	end
 	
 	def probability_of word
-		[frequency_of(word), count]
+		freq = frequency_of(word)
+		# dont want to loose denominator when freq is zero
+		puts "probability_of #{word} = #{freq.inspect} / #{count.inspect} = #{(freq/count).inspect}"
+		freq / count
+		#freq==0 ? Rational.new!(freq,count) : Rational(freq,count)
 	end
 
 	private
 
 	def frequency_of word
-		@words_freq[word] ? @words_freq[word] : 0
+		@words_freq[word] ? @words_freq[word] : Rational(0,1)
 	end
 
 end
@@ -59,7 +64,7 @@ class NaiveBayesClassifier
 			total += 1
 			predicted = classify example.words
 			correct += 1 if predicted == example.main_class
-#			puts "example=#{example.words[0,5].inspect} predicted=#{predicted} actual=#{example.main_class} correct=#{correct} total=#{total}"
+			puts "example=#{example.words[0,5].inspect} predicted=#{predicted} actual=#{example.main_class} correct=#{correct} total=#{total}"
 		end				
 		correct.to_f / total
 	end
@@ -82,10 +87,11 @@ class NaiveBayesClassifier
 	end
 
 	def probability_distribution_for words
+		puts "calcing prob distr for #{words.inspect}"
 		ordered_keys = @class_info.keys
 		probs = ordered_keys.collect { |k| probability_of_class_given_words words, k }
-#		puts "probs #{probs.inspect}"
 		probs.normalized_proportions!
+		probs.reduce_precision!
 		distr = {}
 		ordered_keys.zip(probs).each do |key_value|
 			clas, prob = key_value
@@ -95,14 +101,19 @@ class NaiveBayesClassifier
 	end
 
 	def probability_of_class_given_words words, clas
+		puts "calcing probability_of_class_given_words words=#{words.inspect}, clas=#{clas.inspect}"
 		p_terms = term_probabilities_given_class_with_estimator_if_required words.uniq, clas
-		p_class = [ @class_info[clas].count, @total_training_examples]
+		puts "p_terms = #{p_terms.inspect}"
+		puts "calcing p_class @class_info[clas].count=#{@class_info[clas].count.class} and @total_training_examples=#{@total_training_examples.class}"
+		p_class = @class_info[clas].count / @total_training_examples
+		puts "p_class = #{p_class.inspect}"
 		p_terms << p_class
 		p_terms.product
 	end
 
   def term_probabilities_given_class_with_estimator_if_required words, clas
 		probabilities = term_probabilities_given_class words,clas
+		puts "probabilities = #{probabilities.inspect}"
 		probabilities.apply_estimator! if probabilities.has_at_least_one_zero?
 		probabilities
   end
@@ -113,7 +124,7 @@ class NaiveBayesClassifier
 
   def conditional_probability(word, clas)
     class_info = @class_info[clas]
-    return 0 unless class_info
+    return Rational(0,1) unless class_info
     class_info.probability_of word
   end
 

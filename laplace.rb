@@ -1,5 +1,8 @@
+require 'rational'
+
 class Array
 		
+=begin
 	def nominator
 		self[0]
 	end
@@ -7,6 +10,7 @@ class Array
 	def denominator
 		self[1]
 	end
+=end
 
 	def normalize
 		total = inject { |a,v| a+v }
@@ -32,16 +36,17 @@ class Array
 	end
 	
 	def has_at_least_one_zero?
-		!!(find { |f| f.nominator==0 })
+		!!(find { |f| f.numerator==0 })
 	end
 
 	def numerators 
-		collect { |f| f.nominator }
+		collect { |f| f.numerator }
 	end
 
 	def denominators 
 		collect { |f| f.denominator }
 	end
+=begin
 
 	def recalc_with_lcm
 		lcm_across_fractions = denominators.lcm
@@ -52,14 +57,22 @@ class Array
 		end
 		[adjusted_numerators, lcm_across_fractions]
 	end
+=end
 	
 	def apply_estimator!
 		# numerators, denominator = recalc_with_lcm # NOT REQUIRED FOR CASE OF P(x|read) since all have same denominator
 		denominator = first.denominator
-		replace numerators.collect { |n| [n+1, denominator+numerators.length] }		
+		replace numerators.collect { |n| Rational(n+1, denominator+numerators.length) }		
 	end
 
 	def product
+		product = inject do |v,a| 
+			puts "product!! v=#{v.inspect} a=#{a.inspect} v*a=#{v*a} (v*a).reduce_precision=#{(v*a).reduced_precision}"
+			(v*a).reduced_precision
+		end
+		puts "product of #{self.inspect} is #{product.inspect}"
+		product
+=begin
 		numerator = denominator = 1
 		each do |nd|
 			n,d = nd
@@ -67,14 +80,27 @@ class Array
 			denominator *= d
 		end
 		[ numerator, denominator ]
+=end
 	end
 	
 	def normalized_proportions!
+		puts "PRE  normalisation #{self.inspect}"
+		sum = inject{|v,a| v+a}
+		replace collect{|n| n/sum }
+		puts "POST normalisation #{self.inspect}"		
+=begin
 		denominator_lcm = denominators.lcm
 #		puts "denominators=#{denominators.inspect}"
 		numerator_multipliers = denominators.collect { |d| denominator_lcm / d }
 		new_numerators = numerators.zip(numerator_multipliers).collect { |a| a[0]*a[1] }		
 		replace new_numerators.normalize
+=end
+	end
+
+	def reduce_precision!
+		puts "PRE  reduce_precision #{self.inspect}"
+		replace collect {|n| n.reduced_precision }
+		puts "POST reduce_precision #{self.inspect}"
 	end
 
 	def assert_is_fraction testee=self
@@ -90,4 +116,32 @@ class Array
 		end
 		total_square_error / length
 	end
+end
+
+class Rational
+
+	def reduced_precision
+		return self if numerator < 1e10 && denominator < 1e10
+		to_return = self.reduced_numerator_precision
+		to_return = to_return.reduced_denominator_precision
+		to_return # < 1e200 ? Rational(1,1e200.to_i) : to_return
+	end
+
+	def reduced_numerator_precision
+		if numerator > 1e10
+			divisor = numerator / 1e10
+			Rational((numerator/divisor).to_i, (denominator/divisor).to_i)
+		else
+			self		
+		end
+	end
+
+	def reduced_denominator_precision
+		if denominator > 1e10
+			Rational(1, denominator/numerator)
+		else
+			self
+		end
+	end
+
 end
