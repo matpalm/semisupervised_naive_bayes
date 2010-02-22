@@ -39,6 +39,10 @@ class Array
 		!!(find { |f| f.numerator==0 })
 	end
 
+	def has_at_least_one_one?
+		!!(find { |f| f==Rational(1,1) })
+	end
+
 	def numerators 
 		collect { |f| f.numerator }
 	end
@@ -103,6 +107,12 @@ class Array
 		puts "POST reduce_precision #{self.inspect}"
 	end
 
+	def make_just_zeros_and_one_if_required!
+		puts "PRE  make_just_zeros_and_one_if_required! #{self.inspect}"
+		replace collect { |n| n==Rational(1,1) ? n : Rational(0,1) } if has_at_least_one_one?
+		puts "POST  make_just_zeros_and_one_if_required! #{self.inspect}"
+	end
+
 	def assert_is_fraction testee=self
 		raise "expected array to represent a fraction, not #{testee.inspect}" unless testee.length==2
 	end
@@ -130,6 +140,7 @@ class Rational
 	def reduced_numerator_precision
 		if numerator > 1e10
 			divisor = numerator / 1e10
+			puts "@@@reduced_numerator_precision numerator=#{numerator} denominator=#{denominator}"
 			Rational((numerator/divisor).to_i, (denominator/divisor).to_i)
 		else
 			self		

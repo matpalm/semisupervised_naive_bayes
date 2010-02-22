@@ -35,7 +35,7 @@ class SemiSupervisedNaiveBayesClassifier
 		unlabelled_set.each do |unlabelled_example|
 			new_prob_distr = @nbc.probability_distribution_for unlabelled_example.words
 			unlabelled_example.probability_distribution = new_prob_distr
-			puts "unlabelled_example #{unlabelled_example.words.inspect} has a new prob dist #{new_prob_distr.inspect}"
+			puts "unlabelled_example #{unlabelled_example.words[0,5].inspect}... has a new prob dist #{new_prob_distr.inspect}"
 		end				
 		
 		# record all new probabilities in single array for later convergence checking

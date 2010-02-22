@@ -20,6 +20,10 @@ class ClassInfo
 		end
 	end
 	
+	def includes? word
+		@words_freq.has_key? word	
+	end
+
 	def probability_of word
 		freq = frequency_of(word)
 		# dont want to loose denominator when freq is zero
@@ -92,6 +96,7 @@ class NaiveBayesClassifier
 		probs = ordered_keys.collect { |k| probability_of_class_given_words words, k }
 		probs.normalized_proportions!
 		probs.reduce_precision!
+		probs.make_just_zeros_and_one_if_required!
 		distr = {}
 		ordered_keys.zip(probs).each do |key_value|
 			clas, prob = key_value
@@ -113,18 +118,19 @@ class NaiveBayesClassifier
 
   def term_probabilities_given_class_with_estimator_if_required words, clas
 		probabilities = term_probabilities_given_class words,clas
-		puts "probabilities = #{probabilities.inspect}"
+		puts "term_probabilities_given_class (class=#{clas}) = #{probabilities.inspect}"
 		probabilities.apply_estimator! if probabilities.has_at_least_one_zero?
 		probabilities
   end
 
   def term_probabilities_given_class(words, clas)
-    words.collect { |word| conditional_probability word, clas }
+    words.collect { |word| conditional_probability word, clas }.compact
   end
 
   def conditional_probability(word, clas)
     class_info = @class_info[clas]
-    return Rational(0,1) unless class_info
+    return nil unless class_info
+		return nil unless class_info.includes? word
     class_info.probability_of word
   end
 
