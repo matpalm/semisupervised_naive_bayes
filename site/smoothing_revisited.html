@@ -1,0 +1,379 @@
+<html>
+<head>
+	<title>semi supervised naive bayes</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel=StyleSheet href="style.css" type="text/css">
+</head>
+
+<body>
+
+<p>
+<a href="intro.html">&lt;&lt;&nbsp;&nbsp;semi supervised algorithms</a>&nbsp;&nbsp;&nbsp;
+<a href="index.html">index</a>&nbsp;&nbsp;&nbsp;
+<a href="does_it_do_any_better.html">does it do any better?&nbsp;&nbsp;&gt;&gt;</a>
+</p>
+
+<h1>revisiting the smoothing technique</h1>
+
+<h2>problems with the last approach</h2>
+
+<p>
+there are a few problems with the last approach that limit us from using it for all but the smallest data set.
+it's mainly around trying to calculate an accurate probability distribution for the unlabelled data instead of
+just choosing the most likely class. to be honest they are problems with my implementation, not some fundamental
+problem with the algorithm.
+</p>
+
+<p>
+so to makes things easier for myself i'm going to reimplement with some changes...
+<ol>
+<li>forget trying to get an accurate probability distribution for the unlabelled data and go back
+to the old style of just assigning a doc to one class or another. this simplifies in many ways and looking at the
+previous results it seems that this was happening anyways (eg probability distributions like 0.99/0.01)</li>
+<li>switch from calculating probabilties based on simply a word existing in an article or not (a bernoulli distribution) to using word frequencies within an article (a <a href="/rss.feed/p4/">multinominal distribution</a>)</li>
+<li>change the way we avoid the zero probability problem by simply substituting any zero for a small frequency, say 0.1,
+instead of using a laplace estimator</li>
+</ol>
+</p>
+
+<h2>example using normal naive bayes (without a semi supervised component)</h2>
+
+<p>
+let's redo the example from our last experiment over the same 6 documents with our above changes...</br>
+<table>
+<thead>
+<tr><td>feed</td>         <td>doc</td> <td>article text</td>                         <td>class</td></tr>
+</thead>
+<tbody>
+<tr><td>the register</td> <td>1</td> <td>new linux goes fast</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>ignore</td></tr>
+<tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>ignore</td></tr>
+<tr><td>the register</td> <td>5</td> <td>linux website</td>                 <td>?</td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>     <td>?</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+a new article then comes along...
+<table>
+<thead><tr><td>feed</td>         <td>article text</td>            <td>class</td></tr></thead>
+<tbody><tr><td>perez hilton</td> <td>movie on fashion</td>      <td>??</td></tr></tbody>
+</table>
+</p>
+
+<p>
+first build a term occurence matrix for the four training examples... 
+</p>
+
+<p>
+<table>
+<thead>
+<tr><td>CLASS</td><td>DOC#</td><td>new</td><td>linux</td><td>goes</td><td>fast</td><td>hollywood</td><td>celebrity</td><td>quake</td><td>runs</td><td>on</td><td>occurs</td><td>in</td></tr>
+</thead>
+<tbody>
+<tr><td>read</td>  <td>1</td><td>1</td> <td>1</td> <td>1</td> <td>1</td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td></tr>
+<tr><td>ignore</td><td>2</td><td> </td> <td> </td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td></tr>
+<tr><td>read</td>  <td>3</td><td> </td> <td>1</td> <td> </td> <td> </td> <td> </td> <td> </td> <td>1</td> <td>1</td> <td>1</td> <td> </td> <td> </td></tr>
+<tr><td>ignore</td><td>4</td><td> </td> <td> </td> <td> </td> <td> </td> <td>1</td> <td> </td> <td>1</td> <td> </td> <td> </td> <td>1</td> <td>1</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+we then collapse into just counts for each class...
+<table>
+<thead>
+<tr><td>CLASS</td><td>#DOCS</td><td>new</td><td>linux</td><td>goes</td><td>fast</td><td>hollywood</td><td>celebrity</td><td>quake</td><td>runs</td><td>on</td><td>occurs</td><td>in</td><td>TOTAL</td></tr>
+</thead>
+<tbody>
+<tr><td>read</td>  <td>2</td><td>1</td> <td>2</td> <td>1</td> <td>1</td> <td> </td> <td> </td> <td>1</td> <td>1</td> <td>1</td><td> </td><td></td>  <td>8</td></tr>
+<tr><td>ignore</td><td>2</td><td> </td> <td> </td> <td>1</td> <td>1</td> <td>2</td> <td>1</td> <td>1</td> <td> </td> <td> </td><td>1</td><td>1</td> <td>8</td></tr>
+<tr><td>TOTAL</td> <td>4</td><td>1</td> <td>2</td> <td>2</td> <td>2</td> <td>2</td> <td>1</td> <td>2</td> <td>1</td> <td>1</td><td>1</td><td>1</td> <td>16</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+and to avoid zero probabilities we fill in zero entries with a small value, say 0.1 
+<table>
+<thead>
+<tr><td>class</td><td>#docs</td><td>new</td><td>linux</td><td>goes</td><td>fast</td><td>hollywood</td><td>celebrity</td><td>quake</td><td>runs</td><td>on</td><td>occurs</td><td>in</td><td>TOTAL</td></tr>
+</thead>
+<tbody>
+<tr><td>read</td>   <td>2</td> <td>1</td>   <td>2</td>   <td>1</td> <td>1</td> <td>0.1</td> <td>0.1</td> <td>1</td> <td>1</td>   <td>1</td>   <td>0.1</td> <td>0.1</td>  <td>8.4</td> </tr>
+<tr><td>ignore</td> <td>2</td> <td>0.1</td> <td>0.1</td> <td>1</td> <td>1</td> <td>2</td>   <td>1</td>   <td>1</td> <td>0.1</td> <td>0.1</td> <td>1</td>   <td>1</td>    <td>8.4</td> </tr>
+<tr><td>TOTAL</td>  <td>4</td><td>1.1</td>  <td>2.1</td> <td>2</td> <td>2</td> <td>2.1</td> <td>1.1</td> <td>2</td> <td>1.1</td> <td>1.1</td> <td>1.1</td> <td>1.1</td>  <td>16.8</td> </tr>
+</tbody>
+</table>
+</p>
+
+<p>
+we can now calculate term probabilites conditional on the class; eg <tt>P('on'|read) = 1.0/8.4</tt> since 'on' appears 1 time across the 8.4 words in the 'read' articles. (0.4 comes
+the 4 x 0.1 smoothing values)
+</p>
+
+<p>
+then to classify the new article, <tt>'movie on fashion'</tt>, we calculate which of <tt>P(read)</tt> and <tt>P(ignore)</tt> is greater.
+</p>
+
+<p>
+notes
+<ol>
+<li>it turns out that we can ignore terms we have never seen before; in this case <tt>movie</tt> and <tt>fashion</tt>.</li>
+<li>since we are after a max value we can ignore any constants that are the same across both <tt>P(read|text)</tt> and <tt>P(ignore|text)</tt></li>
+</ol>
+</p>
+
+<pre>
+P(read | 'movie on fashion')
+= P(read | 'on')                                 # ignore movie and fashion
+= P('on'|read) * P(read) / P('on')               # bayes law
+= 1! * (P('on'|read)^1)/1! * P(read) / P('on')   # assume multinominal distrubtion, see <a href="LINK HERE">my previous experiment</a> for more info
+= (P('on'|read)^1)/1! * P(read)                  # ignore constants
+= 1.0/8.4 * 2/4
+= 0.05
+
+P(ignore | 'movie on fashion') 
+= P(ignore | 'on')  
+= P('on'|ignore) * P(ignore) / P('on')
+= 1! * (P('on'|ignore)^1)1! * P(ignore) / P('on')
+= (P('on'|ignore)^1)/1! * P(ignore)
+= 0.1/8.4 * 2/4
+= 0.005
+
+0.05 > 0.005 so classify 'movie on fashion' as 'read'
+</pre>
+</p>
+
+<h2>example using semi supervised naive bayes</h2>
+
+<p>
+so how does a semi supervised version of naive bayes make use of the unlabelled documents?</br>
+</p>
+
+<p>
+let's look at the same corpus as before, with four labelled and two unlabelled examples.
+<table>
+<thead>
+<tr><td>feed</td>         <td>doc</td> <td>article text</td>                         <td>class</td></tr>
+</thead>
+<tbody>
+<tr><td>the register</td> <td>1</td> <td>new linux goes fast</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>ignore</td></tr>
+<tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>ignore</td></tr>
+<tr><td>the register</td> <td>5</td> <td>linux website</td>                 <td>?</td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>     <td>?</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+first we classify documents 5 and 6 using labelled docs 1 thru 4.
+</p>
+
+<p>
+for 'linux website'...
+<pre>
+P(read | 'linux website')
+= P(read | 'linux')                                    # ignore 'website'
+= P('linux'|read) * P(read) / P('linux')               # bayes law
+= 1! * (P('linux'|read)^1)/1! * P(read) / P('linux')   # multinominal distribution
+~= (P('linux'|read)^1)/1! * P(read)                    # ignore constants
+= P('linux'|read) * P(read)         
+= 2.0/8.4 * 2/4
+= 0.119
+
+P(ignore | 'linux website')
+~= P('linux'|ignore) * P(ignore)
+= 0.1/8.4 * 2/4
+= 0.05
+
+0.119 > 0.05 => 'linux website' is classed 'read'
+</pre>
+
+
+</p>
+
+<p>
+and for 'hollywood fashion website'...
+<pre>
+P(read | 'hollywood fashion website')
+= P(read | 'hollywood') # can ignore unseen terms 'fashion' and 'website'
+= P('hollywood' | read) * P(read) / P('hollywood')
+= 0.1/8.4 * 2/4 / (2.1/16.8)
+= 0.05
+
+P(ignore | 'hollywood fashion website')
+= P(ignore | 'hollywood')
+= P('hollywood' | ignore) * P(ignore) / P('hollywood')
+= 2/8.4 * 2/4 / (2.1/16.8)
+= 0.95
+
+0.95 > 0.05 => 'hollywood fashion website' is classed 'ignore'
+</pre>
+</p>
+
+<p>
+we can now insert these predicted classes into our table
+</p>
+
+<p>
+<table>
+<thead>
+<tr><td>feed</td>         <td>doc</td> <td>article text</td>                <td>class</td></tr>
+</thead>
+<tbody>
+<tr><td>the register</td> <td>1</td> <td>new linux goes fast</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>2</td> <td>hollywood celebrity goes fast</td> <td>ignore</td></tr>
+<tr><td>the register</td> <td>3</td> <td>quake runs on linux</td>           <td>read</td></tr>
+<tr><td>perez hilton</td> <td>4</td> <td>quake occurs in hollywood</td>     <td>ignore</td></tr>
+<tr><td>the register</td> <td>5</td> <td>linux website</td>                 <td>read</td></tr>
+<tr><td>perez hilton</td> <td>6</td> <td>hollywood fashion website</td>     <td>ignore</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+rebuild the term occurence matrix...
+<table>
+<thead>
+<tr>
+	<td>class</td><td>doc#</td>
+	<td>new</td><td>linux</td><td>goes</td>
+	<td>fast</td><td>hollywood</td><td>celebrity</td>
+	<td>quake</td><td>runs</td><td>on</td><td>occurs</td>
+	<td>in</td><td>website</td><td>fashion</td>
+</tr>
+</thead>
+<tbody>
+<tr><td>read</td>      <td>1</td><td>1</td> <td>1</td> <td>1</td> <td>1</td> <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td></tr>
+<tr><td>ignore</td>      <td>2</td><td></td>  <td></td>  <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td></tr>
+<tr><td>read</td>      <td>3</td><td></td>  <td>1</td> <td></td>  <td></td>  <td></td>  <td></td>  <td>1</td> <td>1</td> <td>1</td> <td></td>  <td></td>  <td></td>  <td></td></tr>
+<tr><td>ignore</td>      <td>4</td><td></td>  <td></td>  <td></td>  <td></td>  <td>1</td> <td></td>  <td>1</td> <td></td>  <td></td>  <td>1</td> <td>1</td> <td></td>  <td></td></tr>
+<tr><td>read</td><td>5</td><td></td>  <td>1</td> <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td>1</td> <td></td></tr>
+<tr><td>ignore</td><td>6</td><td></td>  <td></td>  <td></td>  <td></td>  <td>1</td> <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td></td>  <td>1</td> <td>1</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+and collapse based on class...
+<table>
+<thead>
+<tr>
+	<td>CLASS</td><td>#DOCS</td>
+	<td>new</td><td>linux</td><td>goes</td>
+	<td>fast</td><td>hollywood</td><td>celebrity</td>
+	<td>quake</td><td>runs</td><td>on</td><td>occurs</td>
+	<td>in</td><td>website</td><td>fashion</td><td>TOTAL</td>
+</tr>
+</thead>
+<tbody>
+<tr><td>read</td>   <td>3</td>  <td>1</td> <td>3</td> <td>1</td> <td>1</td> <td> </td> <td></td>  <td>1</td> <td>1</td> <td>1</td> <td></td>  <td></td>  <td>1</td> <td> </td> <td>10</td></tr>
+<tr><td>ignore</td> <td>3</td>  <td> </td> <td> </td> <td>1</td> <td>1</td> <td>3</td> <td>1</td> <td>1</td> <td></td>  <td></td>  <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>11</td></tr>
+<tr><td>TOTAL</td>  <td>6</td>  <td>1</td> <td>3</td> <td>2</td> <td>2</td> <td>3</td> <td>1</td> <td>2</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>2</td> <td>1</td> <td>21</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+and finally include smoothing values...
+<table>
+<thead>
+<tr>
+	<td>CLASS</td><td>#DOCS</td>
+	<td>new</td><td>linux</td><td>goes</td>
+	<td>fast</td><td>hollywood</td><td>celebrity</td>
+	<td>quake</td><td>runs</td><td>on</td><td>occurs</td>
+	<td>in</td><td>website</td><td>fashion</td><td>TOTAL</td>
+</tr>
+</thead>
+<tbody>
+<tr><td>read</td>   <td>3</td>  <td>1</td>   <td>3</td>   <td>1</td> <td>1</td> <td>0.1</td> <td>0.1</td> <td>1</td> <td>1</td>   <td>1</td>   <td>0.1</td> <td>0.1</td> <td>1</td> <td>0.1</td> <td>10.5</td></tr>
+<tr><td>ignore</td> <td>3</td>  <td>0.1</td> <td>0.1</td> <td>1</td> <td>1</td> <td>3</td>   <td>1</td>   <td>1</td> <td>0.1</td> <td>0.1</td> <td>1</td>   <td>1</td>   <td>1</td> <td>1</td>   <td>11.4</td></tr>
+<tr><td>TOTAL</td>  <td>6</td>  <td>1.1</td> <td>3.1</td> <td>2</td> <td>2</td> <td>3.1</td> <td>1.1</td> <td>2</td> <td>1.1</td> <td>1.1</td> <td>1.1</td> <td>1.1</td> <td>2</td> <td>1.1</td> <td>21.9</td></tr>
+</tbody>
+</table>
+</p>
+
+<p>
+given all this we can now <em>reclassify</em> documents 5 and 6 using a classifier trained with all 6.
+we do this since some documents may no be reclassified.
+</p>
+
+<p>
+for doc 5, linux website...
+<pre>
+P(read | 'linux website')
+= P('linux website' | read) * P(read) / P('linux website')       # bayes law
+= (P('linux'|read)^1)/1! * (P('website'|read)^1)/1! * P(read)    # multinomial with constants removed
+= P('linux'|read) * P('website'|read) * P(read) 
+= 3.0/10.5 * 1.0/10.5 * 3/6
+= 0.0136
+
+P(ignore | 'linux website')
+= P('linux'|read) * P('website'|read) * P(read)                  # bayes + multinominal + removed constants
+= 0.1/11.4 * 1.0/11.4 * 3/6
+= 0.0003
+
+0.0136 > 0.0003 so 'linux website' remains as 'read'
+</pre>
+</p>
+
+<p>
+for doc 6, hollywood fashion website...
+<pre>
+P(read | 'hollywood fashion website')
+= P('hollywood'|read) * P('fashion'|read) * P('website'|read) * P(read)  # bayes + multinominal + constants
+= 0.1/10.5 * 0.1/10.5 * 1/10.5 * 3/6
+= 0.000004
+
+P(ignore | 'hollywood fashion website')
+= P('hollywood'|ignore) * P('fashion'|ignore) * P('website'|ignore) * P(ignore)   # bayes + multinominal + constants
+= 3.0/11.4 * 1/11.4 * 1/11.4 * 3/6
+= 0.001
+
+0.001 > 0.000004 so 'hollywood fashion website' remains as 'ignore'
+</pre>
+</p>
+
+<p>
+the process of retraining and reclassifying the initially unlablled articles can be reiterated until the classes for unlabelled
+articles stabilises, in this example case it was immediate but a non trivial case might take some iterations.
+</p>
+
+<p>
+once the classes have converged we can classify our new document 'movie on fashion' using the classifier training with all 6 examples.
+<pre>
+P(read | 'movie on fashion')
+= P(read | 'on fashion')                                  # ignore unseen terms
+= P('on fashion' | read) * P(read) / P('on fashion')      # bayes law
+= P('on'|read) * P('fashion'|read) * P(read)              # multinominal + remove constants
+= 1.0/10.5 * 0.1/10.5 * 3/6
+= 0.00045
+
+P(ignore | 'movie on fashion')
+= P('movie on fashion' | ignore) * P(ignore) 
+= P('on'|ignore) * P('fashion'|ignore) * P(ignore)       # unseen + bayes + multinominal + constants
+= 0.1/11.4 * 1.0/11.4 * 3/6
+= 0.00038
+
+0.00045 > 0.00038 so classify as 'read'
+
+originally was strongly classified as 'read' (0.05 > 0.005)
+but now it's only just 'read', the additional content from doc 6 (fashion) has brought it down
+
+</pre>
+</p>
+<p>
+
+TOTOOTOTO so this semi supervised algorithm looks promising on paper but the real question is <a href="does_it_do_any_better_v2.html">does it do any better</a> on real data?
+</p>
+
+</body>
+                                                        
+</html>
+
