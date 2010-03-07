@@ -3,10 +3,12 @@ an experiment in semi supervised naive bayes text classification
 a walk through of the project is available at http://matpalm.com/semi_supervised_naive_bayes
 
 in general run things up with
-bash> bzcat perez.bz2 thereg.bz2 | shuf | head -300 | ./main.rb
+bash> bzcat perez.bz2 thereg.bz2 | shuf | head -300 | ./shorten_urls.rb | ./main.rb
 
-there's a problem with a large unlabelled set causing float overflow. to retain umerical accuracy
-this code keeps fractions in rational form (ie 0.5 is represented as [1,2]) and in some
-calculations, particularly lowest common denominator for additive smoothing, the denominators
-go through the roof and fail when being to_f'd. one day i might come back and fix it but things
-were ok for experimental proof of concept data sets sizes; ie 300 articles.
+v2 scalable version
+
+some troubles
+- in general the ssnb never seems to beat the nb
+- never needs to run more than once, convergence is 1 iteration ??
+
+need to rethink the convergence / distribution stuff...

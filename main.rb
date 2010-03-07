@@ -11,7 +11,7 @@ num_unlabelleds = ARGV.collect { |n| n.to_i }
 
 def summary articles
 	freq = Hash.new 0
-	articles.each { |a| freq[a.main_class] += 1 }
+	articles.each { |a| freq[a.clazz] += 1 }
 	"#{articles.length} articles; freq=#{freq.inspect}"
 end
 
@@ -30,14 +30,18 @@ puts "#test=#{summary test} "
 
 nbc = NaiveBayesClassifier.new
 nbc.train labelled
+
 puts "nb result #{nbc.test test}"
 
 num_unlabelleds.each do |num_unlabelled|
 	unlabelled = articles.slice(0,num_unlabelled)
-	#puts "#unlabelled=#{summary unlabelled}"
+	unlabelled.each { |a| a.clazz = nil } 	
+	puts "#unlabelled=#{summary unlabelled}"
 
 	ssnbc = SemiSupervisedNaiveBayesClassifier.new
 	ssnbc.train labelled, unlabelled
 	puts "ssnb result (#{num_unlabelled}) #{ssnbc.test test}"
 
 end
+
+
