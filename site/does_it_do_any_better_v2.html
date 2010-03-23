@@ -13,35 +13,20 @@
 <a href="rewriting_for_scale.html">v2: rewriting for scale&nbsp;&nbsp;&gt;&gt;</a>
 </p>
 
-<h1>but does it do any better?</h1>
+<h1>but does it do any better? (v2)</h1>
 
-<h2>comparing plain supervised naive bayes vs semi supervised naive bayes</h2>
+<h2>rerunning the same tests</h2>
 
 <p>
-as a test i took a random sample of 300 rss articles from a total of 8000. there was roughly a 50/50 split of articles between perez hilton and the register.
-</p>
-
-<p> 
-they were partitioned into 3 sets...
-<table>
-<thead>
-<tr><td>article set</td><td>number articles</td></tr>
-</thead>
-<tbody>
-<tr><td>labelled training</td> <td>30</td></tr>
-<tr><td>labelled test</td> <td>30</td></tr>
-<tr><td>unlabelled training</td> <td>240</td></tr>
-</tbody>
-</table>
+let's rerun <a href="does_it_do_any_better.html">the same tests</a>, using the same method, we did before.
 </p>
 
 <p>
-a standard naive bayes classifier was training using the <em>labelled training</em> set and evaluated for correctness using the <em>labelled test</em> set.
+again as a test i took a random sample of 300 rss articles from a total of 8000.
 </p>
 
 <p>
-a semi supervised naive bayes classifier was trained with both the <em>labelled training</em> and <em>unlabelled training</em> sets using the scheme 
-we've been discussing.correctness was again evaluated using the <em>labelled test</em> set.
+30 articles were used for the training set, 30 for the test set with a varying number were used for the unlablled extras.
 </p>
 
 <p>
@@ -49,7 +34,7 @@ the experiment was repeated 7 times for a different random 300 articles with the
 </p>
 
 <p>
-<img src="g20.v1.png"/>
+<img src="g20.v2.png"/>
 </p>
 
 <p>
@@ -59,7 +44,7 @@ in general, seems semi supervised works pretty well!
 </p>
 
 <p>
-trouble is my clumsy implementation doesn't scale past a few hundred articles so we <a href="rewriting_for_scale.html">need to change it</a> 
+trouble is my clumsy implementation doesn't scale so we <a href="rewriting_for_scale.html">need to change it</a> 
 </p>
 
 <p>

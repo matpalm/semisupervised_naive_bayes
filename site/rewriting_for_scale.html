@@ -11,7 +11,7 @@
 <a href="does_it_do_any_better.html">&lt;&lt;&nbsp;&nbsp;does it do any better?</a>&nbsp;&nbsp;&nbsp;
 <a href="index.html">index</a>&nbsp;&nbsp;&nbsp;
 COMING SOON: how does v2 go?
-</p>
+x</p>
 
 <h1>v2: rewriting for scale</h1>
 
@@ -145,6 +145,14 @@ P(ignore | 'movie on fashion')
 
 0.05 > 0.005 so classify 'movie on fashion' as 'read'
 </pre>
+
+<p>
+this is not the best result; you'd think that 'movie' and 'fashion' would imply
+that i don't want to read this. but since they haven't been seen before the 
+only word we've got to work with is 'on'
+</p>
+
+</pre>
 </p>
 
 <h2>example using semi supervised naive bayes</h2>
@@ -189,11 +197,10 @@ P(read | 'linux website')
 P(ignore | 'linux website')
 ~= P('linux'|ignore) * P(ignore)
 = 0.1/8.4 * 2/4
-= 0.05
+= 0.005
 
-0.119 > 0.05 => 'linux website' is classed 'read'
+0.119 > 0.005 => 'linux website' is classed 'read'
 </pre>
-
 
 </p>
 
@@ -202,17 +209,17 @@ and for 'hollywood fashion website'...
 <pre>
 P(read | 'hollywood fashion website')
 = P(read | 'hollywood') # can ignore unseen terms 'fashion' and 'website'
-= P('hollywood' | read) * P(read) / P('hollywood')
-= 0.1/8.4 * 2/4 / (2.1/16.8)
-= 0.05
+= P('hollywood' | read) * P(read) 
+= 0.1/8.4 * 2/4 
+= 0.005
 
 P(ignore | 'hollywood fashion website')
 = P(ignore | 'hollywood')
-= P('hollywood' | ignore) * P(ignore) / P('hollywood')
-= 2/8.4 * 2/4 / (2.1/16.8)
-= 0.95
+= P('hollywood' | ignore) * P(ignore)
+= 2/8.4 * 2/4 
+= 0.119
 
-0.95 > 0.05 => 'hollywood fashion website' is classed 'ignore'
+0.119 > 0.005 => 'hollywood fashion website' is classed 'ignore'
 </pre>
 </p>
 
@@ -370,11 +377,7 @@ but now it's only just 'read', the additional content from doc 6 (fashion) has b
 </p>
 
 <p>
-so i'm still implementing this one, should be done in a week or two :)
-</p>
-
-<p>
-in the mean time all the code is on <a href="http://github.com/matpalm/semisupervised_naive_bayes">github</a> and feel free to check out <a href="http://matpalm.com">other stuff i've done</a>
+here's LINK <a href="">the code</a> for this new implementation. how does this one do? and does it scale? LINK <a href="">let's have a look</a>
 </p>
 
 <p>

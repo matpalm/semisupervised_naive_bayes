@@ -3,7 +3,6 @@ class SemiSupervisedNaiveBayesClassifier
 	def train labelled_set, unlabelled_set
 		make_new_classifier
 		train_classifier_with labelled_set
-		#record_all_distrinct_classes
 		assign_probabilities_to unlabelled_set
 		while not converged?
 			make_new_classifier
@@ -25,13 +24,6 @@ class SemiSupervisedNaiveBayesClassifier
 		@nbc.train set
 	end
 
-=begin
-	def record_all_distrinct_classes
-		# we do this once to ensure same order from now onwards..
-		@all_classes = @nbc.known_classes
-	end
-=end
-
 	def assign_probabilities_to unlabelled_set
 		# assign new class based on classification
 		@last_assigned_classes = @assigned_classes
@@ -50,9 +42,6 @@ class SemiSupervisedNaiveBayesClassifier
 	end
 
 	def converged?
-		puts "converged check? "
-		puts "@assigned_classes      = #{@assigned_classes.inspect}"
-		puts "@last_assigned_classes = #{@last_assigned_classes.inspect}" 
 		return false if @last_assigned_classes.nil?
 		return @assigned_classes == @last_assigned_classes
 	end

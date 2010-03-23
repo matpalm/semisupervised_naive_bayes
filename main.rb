@@ -35,8 +35,8 @@ puts "nb result #{nbc.test test}"
 
 num_unlabelleds.each do |num_unlabelled|
 	unlabelled = articles.slice(0,num_unlabelled)
-	unlabelled.each { |a| a.clazz = nil } 	
 	puts "#unlabelled=#{summary unlabelled}"
+	unlabelled.each { |a| a.clazz = nil } 	
 
 	ssnbc = SemiSupervisedNaiveBayesClassifier.new
 	ssnbc.train labelled, unlabelled

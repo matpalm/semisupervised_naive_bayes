@@ -9,16 +9,18 @@ num_classifiers = 5
 num_test_runs = 7
 m = matrix(nrow=num_classifiers, ncol=num_test_runs)
 
-data = read.csv('results.csv')
+data = read.csv('results_run2.csv')
 
-png("g20.png", width = 800, height = 480, bg = "transparent")
+png("g20.v2.png", width = 800, height = 480, bg = "transparent")
 data_training = data[data$training==20,]
 
 for(n in 1:7) {
 	run_stats = as.vector(data_training[n,][,2:6], mode='numeric')	
-#	m[,n] = rcumsum(run_stats)
-	m[,n] = run_stats
+	m[,n] = rcumsum(run_stats)
+#	m[,n] = run_stats
 }
+
+m
 
 # Expand right side of clipping rect to make room for the legend
 # (from http://www.harding.edu/fmccown/R/)
