@@ -5,10 +5,20 @@ a walk through of the project is available at http://matpalm.com/semi_supervised
 in general run things up with
 bash> bzcat perez.bz2 thereg.bz2 | shuf | head -300 | ./shorten_urls.rb | ./main.rb
 
-v2 scalable version
+git tag v1_diy_fractions
+nominal naive bayes implementation with diy rational arithmetic
+fails due to numerical overflow
 
-some troubles
-- in general the ssnb never seems to beat the nb
-- never needs to run more than once, convergence is 1 iteration ??
+git tag v2_fractions_using_rational
+rewrite using ruby's native Rational object
+fails for same reason as v1
 
-need to rethink the convergence / distribution stuff...
+git tag v3_multinominal_rewrite
+rewrite using multinominal naive bayes and explicit bucketing of articles into a class rather than
+retained distributions (quick test showed that the unlabelled articles almost ALWAYS followed a distribution
+along the lines of 0.99/0.01 anyways (??)) 
+
+TODO
+convergence of unlabelled set is always in a single iteration; this rings some warning bells for me.
+even though it works something isn't right; perhaps should introduce unlabelled values incrementally?
+
