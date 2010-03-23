@@ -9,9 +9,9 @@ num_classifiers = 5
 num_test_runs = 7
 m = matrix(nrow=num_classifiers, ncol=num_test_runs)
 
-data = read.csv('results_run2.csv')
+data = read.csv('results_run1.csv')
 
-png("g20.v2.png", width = 800, height = 480, bg = "transparent")
+png("g20.12.v1.png", width = 500, height = 480, bg = "transparent")
 data_training = data[data$training==20,]
 
 for(n in 1:7) {
@@ -27,8 +27,8 @@ m
 par(mar=c(5, 4, 4, 2) + 0.1)
 par(xpd=T, mar=par()$mar+c(0,0,0,5))
 barplot(m, ylim=0:1, col=hue_scale)
-legend(8.75,0.75, rev(names(data)[2:6]), fill=rev(hue_scale))
-title("semi supervised naive bayes")
+#legend(8.75,0.75, rev(names(data)[2:6]), fill=rev(hue_scale))
+title("nominal semi supervised naive bayes")
 dev.off()
 
 

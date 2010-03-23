@@ -34,32 +34,26 @@ the experiment was repeated 7 times for a different random 300 articles with the
 </p>
 
 <p>
-<img src="g20.v2.png"/>
+<img src="g20.12.v1.png"/><img src="g20.12.v2.png"/>
 </p>
 
 <p>
-in every case we can see having the adding additional unlablled data makes an improvement. yay!</br>
-it's interesting that, for run 1 and 3, 200 unlabelled examples did no better than 100 unlabelled examples.</br>
-in general, seems semi supervised works pretty well!
+an interesting thing to note is that the default multinominal supervised classifier does a hell of a lot better than the default nominal supervised classifier before we even consider the semi supervised part...
+<p>
+
+<p>
+it also scales well past 200 articles but, doesn't really need it for this simple two class problem it seems
 </p>
 
 <p>
-trouble is my clumsy implementation doesn't scale so we <a href="rewriting_for_scale.html">need to change it</a> 
+TODO!
+a 5-6 class problem and some graphs showing some real scaling, in the mean time i've got <a href="http://matpalm.com/blog/tag/e10">distracted by something else!</a>
+</p>
 </p>
 
 <p>
-<small>february two thousand and ten</small>
+<small>march two thousand and ten</small>
 </p>
-
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-10409220-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
 
 </body>
 </html>
